@@ -41,3 +41,14 @@ def divide_set(rows, column, check):
 
     return part1, part2
 
+
+def unique_counts(rows):
+    """ Create counts of each possible result. Last column of each row is the result. """
+
+    results = {}
+    for row in rows:
+        row_result = row[-1]
+        if row_result not in results:
+            results[row_result] = 0
+        results[row_result] += 1
+    return results
