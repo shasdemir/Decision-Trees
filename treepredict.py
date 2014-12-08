@@ -1,3 +1,6 @@
+from PIL import Image, ImageDraw
+
+
 my_data = [['slashdot', 'USA', 'yes', 18, 'None'],
            ['google', 'France', 'yes', 23, 'Premium'],
            ['digg', 'USA', 'yes', 24, 'Basic'],
@@ -133,3 +136,55 @@ def print_tree(tree, indent="    "):
         print_tree(tree.true_child, indent + "    ")
         print indent + "F ->",
         print_tree(tree.false_child, indent + "    ")
+
+
+def get_width(tree):
+    if tree.true_child is None and tree.false_child is None:
+        return 1
+    return get_width(tree.true_child) + get_width(tree.false_child)
+
+
+def get_depth(tree):
+    if tree.true_child is None and tree.false_child is None:
+        return 1
+    return max(get_depth(tree.true_child), get_depth(tree.false_child)) + 1
+
+
+def draw_tree(tree, jpeg="tree.png"):
+    """ Determine the appropriate total size and pass a canvas and the top node to draw_node. """
+
+    w = get_width(tree) * 100
+    h = get_depth(tree) * 100 + 120
+
+    img = Image.new('RGB', (w, h), (255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    draw_node(draw, tree, w/2., 20)
+    img.save(jpeg, 'PNG')
+
+
+def draw_node(draw, tree, x, y):
+    """ Draw the nodes recursively. """
+
+    if tree.results is None:
+        # get the width of each branch
+        w1 = get_width(tree.false_child) * 100
+        w2 = get_width(tree.true_child) * 100
+
+        # determine the total space required by this node
+        left = x - (w1 + w2) / 2.
+        right = x + (w1 + w2) / 2.
+
+        # draw the condition string
+        draw.text((x - 20, y - 20), str(tree.column) + ": " + str(tree.true_value), (0, 0, 0))
+
+        # draw links to the branches
+        draw.line((x, y, left + w1 / 2., y + 100), fill=(255, 0, 0))
+        draw.line((x, y, right - w2 / 2., y + 100), fill=(255, 0, 0))
+
+        # draw the branch nodes
+        draw_node(draw, tree.false_child, left + w1 / 2., y + 100)
+        draw_node(draw, tree.true_child, right - w2 / 2., y + 100)
+    else:
+        txt = " \n".join(["%s:%d" %v for v in tree.results.items()])
+        draw.text((x - 20, y), txt, (0, 0, 0))
