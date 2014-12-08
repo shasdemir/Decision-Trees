@@ -188,3 +188,24 @@ def draw_node(draw, tree, x, y):
     else:
         txt = " \n".join(["%s:%d" %v for v in tree.results.items()])
         draw.text((x - 20, y), txt, (0, 0, 0))
+
+
+def classify(observation, tree):
+    """ Classify observation according to the tree. """
+
+    if tree.results is not None:
+        return tree.results
+    else:
+        v = observation[tree.column]
+        branch = None
+        if isinstance(v, int) or isinstance(v, float):
+            if v >= tree.true_value:
+                branch = tree.true_child
+            else:
+                branch = tree.false_child
+        else:
+            if v == tree.true_value:
+                branch = tree.true_child
+            else:
+                branch = tree.false_child
+        return classify(observation, branch)
