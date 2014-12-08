@@ -52,3 +52,20 @@ def unique_counts(rows):
             results[row_result] = 0
         results[row_result] += 1
     return results
+
+
+def gini_impurity(rows):
+    """ Calculate the Gini impurity of a selection of rows. Gini impurity is the probability that a randomly placed
+    item will be in the wrong category. Note: The random selection of placement is not uniform over the categories. """
+
+    total = len(rows)
+    counts = unique_counts(rows)
+    imp = 0
+
+    for k1 in counts:
+        p1 = float(counts[k1] / total)
+        for k2 in counts:
+            if k1 != k2:
+                p2 = float(counts[k2] / total)
+                imp += p1 * p2
+    return imp
