@@ -23,3 +23,21 @@ class DecisionNode(object):
         self.results = results  # dict of results for this leaf. None except leaf nodes.
         self.true_child = true_child  # ref to child DecisionNode if the test is true
         self.false_child = false_child  # false child
+
+
+def divide_set(rows, column, check):
+    """ Divide the set on a specific column. Can handle numeric or nominal values. Return rows as two parts, one the
+    values on the specified column satisfies the check, other do not. """
+
+    # Make a function to determine if a row is in the first group (true) or the second group (false)
+    if isinstance(check, int) or isinstance(check, float):
+        split_function = lambda row: row[column] >= check
+    else:
+        split_function = lambda row: row[column] == check
+
+    # divide the rows and return the partition
+    part1 = filter(split_function, rows)
+    part2 = filter(lambda row: not split_function(row), rows)
+
+    return part1, part2
+
