@@ -63,9 +63,23 @@ def gini_impurity(rows):
     imp = 0
 
     for k1 in counts:
-        p1 = float(counts[k1] / total)
+        p1 = float(counts[k1]) / total
         for k2 in counts:
             if k1 != k2:
-                p2 = float(counts[k2] / total)
+                p2 = float(counts[k2]) / total
                 imp += p1 * p2
     return imp
+
+
+def entropy(rows):
+    """ Entropy: sum of -p(x)log(p(x)) across all possible different results. """
+
+    from math import log
+    log2 = lambda x: log(x) / log(2)
+
+    results = unique_counts(rows)
+    ent = 0.
+    for res in results:
+        p = float(results[res]) / len(rows)
+        ent = ent - p * log2(p)
+    return ent
