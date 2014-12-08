@@ -81,5 +81,55 @@ def entropy(rows):
     ent = 0.
     for res in results:
         p = float(results[res]) / len(rows)
-        ent = ent - p * log2(p)
+        ent -= p * log2(p)
     return ent
+
+
+def build_tree(rows, score_f=entropy):
+    if len(rows) == 0:
+        return DecisionNode()
+
+    current_score = score_f(rows)
+
+    # set up variables to track best criteria
+    best_gain = 0.
+    best_criteria = None
+    best_sets = None
+
+    column_count = len(rows[0]) - 1  # 0-based count
+    for col in range(column_count):  # generate the list of different values in this column
+        column_values = {}
+        for row in rows:
+            column_values[row[col]] = 1
+        # try dividing the rows up for each value in this column
+        for value in column_values:
+            set1, set2 = divide_set(rows, col, check=value)
+
+            # information gain
+            p = float(len(set1)) / len(rows)
+            gain = current_score - p * score_f(set1) - (1-p) * score_f(set2)
+
+            if gain > best_gain and len(set1) > 0 and len(set2) > 0:
+                best_gain = gain
+                best_criteria = col, value
+                best_sets = set1, set2
+
+    if best_gain > 0:  # create subbranches
+        true_branch, false_branch = build_tree(best_sets[0]), build_tree(best_sets[1])
+
+        return DecisionNode(column=best_criteria[0], true_value=best_criteria[1],
+                            true_child=true_branch, false_child=false_branch)
+    else:
+        return DecisionNode(results=unique_counts(rows))
+
+
+def print_tree(tree, indent="    "):
+    if tree.results is not None:  # leaf node
+        print tree.results
+    else:
+        print str(tree.column) + ": " + str(tree.true_value) + "? "  # print the criteria
+
+        print indent + "T ->",
+        print_tree(tree.true_child, indent + "    ")
+        print indent + "F ->",
+        print_tree(tree.false_child, indent + "    ")
