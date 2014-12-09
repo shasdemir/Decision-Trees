@@ -232,3 +232,38 @@ def prune(tree, min_gain):
         if delta < min_gain:  # merge
             tree.true_child, tree.false_child = None, None
             tree.results = unique_counts(tb + fb)
+
+
+def mdclassify(observation, tree):
+    """ Classify observations even if there are missing data points. """
+
+    if tree.results is not None:
+        return tree.results
+    else:
+        v = observation[tree.column]
+        if v is None:
+            tr, fr = mdclassify(observation, tree.true_child), mdclassify(observation, tree.false_child)
+
+            t_count, f_count = sum(tr.values()), sum(fr.values())
+
+            tw = float(t_count) / (t_count + f_count)
+            fw = float(f_count) / (t_count + f_count)
+
+            result = {}
+            for k, v in tr.iteritems():
+                result[k] = v * tw
+            for k, v in fr.iteritems():
+                result[k] = result.setdefault(k, 0) + (v * fw)
+            return result
+        else:
+            if isinstance(v, int) or isinstance(v, float):
+                if v >= tree.true_value:
+                    branch = tree.true_child
+                else:
+                    branch = tree.false_child
+            else:
+                if v == tree.true_value:
+                    branch = tree.true_child
+                else:
+                    branch = tree.false_child
+            return mdclassify(observation, branch)
