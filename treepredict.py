@@ -267,3 +267,12 @@ def mdclassify(observation, tree):
                 else:
                     branch = tree.false_child
             return mdclassify(observation, branch)
+
+
+def variance(rows):
+    if len(rows) == 0:
+        return 0
+    data = [float(row[-1]) for row in rows]
+    mean = sum(data) / len(data)
+    variance = sum([(d - mean) ** 2 for d in data]) / float(len(data))
+    return variance
